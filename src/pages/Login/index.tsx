@@ -16,7 +16,7 @@ import {
 import { message, Space, Tabs } from 'antd';
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
-import { history } from '@umijs/max';
+import { history } from '@umijs/max'
 import services from '@/services/login';
 const { login } = services.LoginController;
 type LoginType = 'phone' | 'account';
@@ -36,9 +36,10 @@ const Login: React.FC = () => {
       <div style={{ backgroundColor: 'white' }}>
         <LoginForm
           onFinish={async (values) => {
-            const data = await login({ ...values });
+            const data: any = await login({ ...values });
             if (data.success) {
               message.success('登录成功');
+              localStorage.setItem('userinfo', JSON.stringify(data.data))
               history.push('/');
             } else {
               message.error('用户名或密码不正确');
