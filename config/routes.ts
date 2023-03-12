@@ -17,6 +17,13 @@ export default [
     wrappers: ['@/wrappers/auth'],
   },
   {
+    name: '个人中心',
+    path: '/center',
+    component: '@/pages/Center',
+    exact: true,
+    wrappers: ['@/wrappers/auth'],
+  },
+  {
     name: '权限演示',
     exact: true,
     path: '/access',
