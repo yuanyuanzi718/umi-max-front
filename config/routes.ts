@@ -24,6 +24,13 @@ export default [
     wrappers: ['@/wrappers/auth'],
   },
   {
+    name: '用户管理',
+    exact: true,
+    path: '/user',
+    component: '@/pages/User',
+    wrappers: ['@/wrappers/auth'],
+  },
+  {
     name: '权限演示',
     exact: true,
     path: '/access',
