@@ -15,7 +15,8 @@
     "@ant-design/pro-components": "^2.0.1",
     "@umijs/max": "^4.0.55",
     "antd": "^5.0.0",
-    "husky": "^8.0.1"
+    "husky": "^8.0.1",
+    "react-quill": "^2.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
