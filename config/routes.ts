@@ -38,6 +38,13 @@ export default [
     wrappers: ['@/wrappers/auth'],
   },
   {
+    name: '产品管理',
+    exact: true,
+    path: '/product',
+    component: '@/pages/Product',
+    wrappers: ['@/wrappers/auth'],
+  },
+  {
     name: '权限演示',
     exact: true,
     path: '/access',

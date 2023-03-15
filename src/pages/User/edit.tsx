@@ -1,16 +1,31 @@
-import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
-import type { UploadChangeParam } from 'antd/es/upload';
-import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
+import { PlusOutlined } from '@ant-design/icons';
+import type { UploadFile, UploadProps, RcFile } from 'antd/es/upload/interface';
 import React, {
   useState,
   useImperativeHandle,
   forwardRef,
   PropsWithChildren,
 } from 'react';
-import { Button, Drawer, Form, Input, message, Select, Upload } from 'antd';
+import {
+  Button,
+  Drawer,
+  Form,
+  Input,
+  message,
+  Select,
+  Modal,
+  Upload,
+} from 'antd';
 import { create, update } from './service';
 const { Option } = Select;
 const { TextArea } = Input;
+const getBase64 = (file: RcFile): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 
 interface EditProps {
   reload: any;
@@ -24,15 +39,34 @@ const Edit: React.FC<PropsWithChildren<EditProps>> = forwardRef(
     const [open, setOpen] = useState(false);
     const [record, setRecord] = useState<any>({});
     const [status, setStatus] = useState(1);
-    const [load, setLoad] = useState(false);
-    const [imageUrl, setImageUrl] = useState<string>();
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+    const [previewTitle, setPreviewTitle] = useState('');
+    const [fileList, setFileList] = useState<any>([]);
 
-    const formMap = (value: any) => {
-      let tem = JSON.parse(JSON.stringify(value));
-      if (tem.avatar) {
-        tem.avatar = [{ url: value?.avatar }];
+    const handleCancel = () => setPreviewOpen(false);
+    const handlePreview = async (file: UploadFile) => {
+      if (!file.url && !file.preview) {
+        file.preview = await getBase64(file.originFileObj as RcFile);
       }
-      return tem;
+      setPreviewImage(file.url || (file.preview as string));
+      setPreviewOpen(true);
+      setPreviewTitle(
+        file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1),
+      );
+    };
+
+    const handleChange: UploadProps['onChange'] = ({
+      fileList: newFileList,
+    }) => {
+      setFileList(newFileList);
+    };
+
+    const normFile = (e: any) => {
+      if (Array.isArray(e)) {
+        return e;
+      }
+      return e?.fileList;
     };
 
     const showDrawer = (value: any) => {
@@ -41,12 +75,14 @@ const Edit: React.FC<PropsWithChildren<EditProps>> = forwardRef(
         setOpen(true);
         setStatus(status);
         setRecord(record);
+        setFileList([]);
         form.resetFields();
       } else {
         setOpen(true);
         setStatus(status);
         setRecord(record);
-        form.setFieldsValue(formMap(formDetail));
+        setFileList([formDetail.avatar]);
+        form.setFieldsValue(formDetail);
       }
     };
 
@@ -56,50 +92,23 @@ const Edit: React.FC<PropsWithChildren<EditProps>> = forwardRef(
       setOpen(false);
     };
 
-    // 头像
-    const uploadButton = (
-      <div>
-        {load ? <LoadingOutlined /> : <PlusOutlined />}
-        <div style={{ marginTop: 8 }}>Upload</div>
-      </div>
-    );
-    const handleChange: UploadProps['onChange'] = (
-      info: UploadChangeParam<UploadFile>,
-    ) => {
-      if (info.file.status === 'uploading') {
-        setLoad(true);
-        return;
-      }
-      if (info.file.status === 'done') {
-        setImageUrl(info.file.thumbUrl);
-        setLoad(false);
-      }
-    };
-
-    const normFile = (e: any) => {
-      if (Array.isArray(e)) {
-        return e;
-      }
-      return e?.fileList;
-    };
     // 提交表单
     const onFinish = async (values: any) => {
-      const tem = JSON.parse(JSON.stringify(values));
-      if (values.avatar && values.avatar.length > 0) {
-        tem.avatar = values.avatar[0].thumbUrl;
+      if (fileList && fileList.length === 1) {
+        values.avatar = fileList[0];
       }
       if (status === 1) {
-        const data = await create({ ...tem });
+        const data = await create({ ...values });
         if (data.success) {
           message.success('新建成功');
           onClose();
           reload.current.reload();
         }
       } else {
-        tem._id = record._id;
-        const data = await update({ ...tem });
+        values._id = record._id;
+        const data = await update({ ...values });
         if (data.success) {
-          message.success('修改成功');
+          message.success('更新成功');
           onClose();
           reload.current.reload();
         }
@@ -164,23 +173,31 @@ const Edit: React.FC<PropsWithChildren<EditProps>> = forwardRef(
             <TextArea rows={4} placeholder="请输入" allowClear />
           </Form.Item>
           <Form.Item
-            name="avatar"
-            label="头像"
+            label="封面图片"
             valuePropName="fileList"
             getValueFromEvent={normFile}
           >
             <Upload
-              name="avatar"
-              maxCount={1}
               listType="picture-card"
+              fileList={fileList}
+              onPreview={handlePreview}
               onChange={handleChange}
             >
-              {imageUrl ? (
-                <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
-              ) : (
-                uploadButton
+              {fileList.length >= 1 ? null : (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
               )}
             </Upload>
+            <Modal
+              open={previewOpen}
+              title={previewTitle}
+              footer={null}
+              onCancel={handleCancel}
+            >
+              <img alt="example" style={{ width: '100%' }} src={previewImage} />
+            </Modal>
           </Form.Item>
           <div
             style={{

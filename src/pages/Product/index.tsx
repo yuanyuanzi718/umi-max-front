@@ -2,23 +2,19 @@ import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { Popconfirm, Button, message, Space } from 'antd';
 import React, { useRef } from 'react';
 import Edit from './edit';
-import { getList, detail, del } from './service';
-
-const UserList: React.FC<unknown> = () => {
+import { getList, del } from './service';
+const Product: React.FC<unknown> = () => {
   const actionRef = useRef<any>();
   const editRef = useRef<any>(null);
 
   // 新建/详情
   const openEditHandler = async (record?: any) => {
     if (record) {
-      const data: any = await detail(record._id);
-      if (data.success) {
-        editRef.current.showDrawer({
-          status: 2, // 1 代表新建 2 代表修改
-          record: record,
-          formDetail: data.data,
-        });
-      }
+      editRef.current.showDrawer({
+        status: 2, // 1 代表新建 2 代表修改
+        record: record,
+        formDetail: record,
+      });
     } else {
       editRef.current.showDrawer({
         status: 1,
@@ -34,31 +30,25 @@ const UserList: React.FC<unknown> = () => {
       actionRef.current.reload();
     }
   };
+
   const columns: any = [
     {
-      title: '用户名',
-      dataIndex: 'username',
+      title: '产品名称',
+      dataIndex: 'title',
       width: '20%',
     },
     {
-      title: '角色',
-      dataIndex: 'role',
+      title: '简要描述',
+      dataIndex: 'introduction',
       width: '20%',
-      valueEnum: {
-        1: { text: '管理员', status: '1' },
-        2: { text: '编辑员', status: '2' },
-      },
     },
     {
-      title: '性别',
-      dataIndex: 'gender',
+      title: '更新时间',
+      dataIndex: 'editTime',
+      valueType: 'date',
       search: false,
+      sorter: true,
       width: '20%',
-      valueEnum: {
-        1: { text: '男', status: '1' },
-        2: { text: '女', status: '2' },
-        3: { text: '未知', status: '3' },
-      },
     },
     {
       title: '操作',
@@ -121,4 +111,4 @@ const UserList: React.FC<unknown> = () => {
     </PageContainer>
   );
 };
-export default UserList;
+export default Product;

@@ -33,8 +33,8 @@ const Index: React.FC = () => {
       <Avatar
         size="large"
         src={
-          initialState?.userinfo?.avatar
-            ? initialState?.userinfo.avatar
+          initialState?.userinfo?.avatar?.thumbUrl
+            ? initialState?.userinfo.avatar?.thumbUrl
             : 'https://joesch.moe/api/v1/random'
         }
       />

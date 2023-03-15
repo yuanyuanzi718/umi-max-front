@@ -84,7 +84,7 @@ const Login: React.FC = () => {
                   size: 'large',
                   prefix: <LockOutlined className={'prefixIcon'} />,
                 }}
-                placeholder={'密码: 123456'}
+                placeholder={'密码: 123'}
                 rules={[{ required: true, message: '请输入密码！' }]}
               />
             </>

@@ -6,20 +6,9 @@ import React, {
   forwardRef,
   PropsWithChildren,
 } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import {
-  Button,
-  Drawer,
-  Modal,
-  Form,
-  Input,
-  message,
-  Select,
-  Upload,
-} from 'antd';
+import { Button, Drawer, Modal, Form, Input, message, Upload } from 'antd';
 import { create, update } from './service';
-const { Option } = Select;
+const { TextArea } = Input;
 const getBase64 = (file: RcFile): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -34,7 +23,6 @@ const Edit: React.FC<PropsWithChildren<any>> = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false);
   const [record, setRecord] = useState<any>({});
   const [status, setStatus] = useState(1);
-  const [value, setValue] = useState<any>('');
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
@@ -71,6 +59,7 @@ const Edit: React.FC<PropsWithChildren<any>> = forwardRef((props, ref) => {
       setOpen(true);
       setStatus(status);
       setRecord(record);
+      setFileList([]);
       form.resetFields();
     } else {
       setOpen(true);
@@ -93,7 +82,6 @@ const Edit: React.FC<PropsWithChildren<any>> = forwardRef((props, ref) => {
       values.cover = fileList[0];
     }
     if (status === 1) {
-      values.isPublish = 1; //   1 已发布 2 未发布,
       const data = await create({ ...values });
       if (data.success) {
         message.success('新建成功');
@@ -102,7 +90,6 @@ const Edit: React.FC<PropsWithChildren<any>> = forwardRef((props, ref) => {
       }
     } else {
       values._id = record._id;
-      values.isPublish = record.isPublish;
       const data = await update({ ...values });
       if (data.success) {
         message.success('更新成功');
@@ -136,29 +123,25 @@ const Edit: React.FC<PropsWithChildren<any>> = forwardRef((props, ref) => {
         autoComplete="off"
       >
         <Form.Item
-          label="标题"
+          label="产品名称"
           name="title"
           rules={[{ required: true, message: '请输入' }]}
         >
           <Input placeholder="请输入" allowClear />
         </Form.Item>
         <Form.Item
-          label="内容"
-          name="content"
+          label="产品简要描述"
+          name="introduction"
           rules={[{ required: true, message: '请输入' }]}
         >
-          <ReactQuill theme="snow" value={value} onChange={setValue} />
+          <TextArea rows={4} placeholder="请输入" allowClear />
         </Form.Item>
         <Form.Item
-          label="类型"
-          name="category"
+          label="产品详细描述"
+          name="detail"
           rules={[{ required: true, message: '请输入' }]}
         >
-          <Select placeholder="请选择" allowClear>
-            <Option value={1}>最新动态</Option>
-            <Option value={2}>典型案例</Option>
-            <Option value={3}>通知公告</Option>
-          </Select>
+          <TextArea rows={4} placeholder="请输入" allowClear />
         </Form.Item>
         <Form.Item
           label="封面图片"

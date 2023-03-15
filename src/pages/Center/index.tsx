@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-components';
-import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import {
   Col,
   Row,
@@ -10,40 +10,46 @@ import {
   Select,
   Upload,
   message,
+  Modal,
 } from 'antd';
 import React, { useState } from 'react';
 import { trim } from '@/utils/format';
-import type { UploadChangeParam } from 'antd/es/upload';
-import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
+import type { UploadFile, UploadProps, RcFile } from 'antd/es/upload/interface';
 import services from '@/services/center';
 import { useModel } from '@umijs/max';
 const { upload } = services.Centercontroller;
 const { Meta } = Card;
 const { Option } = Select;
 const { TextArea } = Input;
+const getBase64 = (file: RcFile): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 
 const Center: React.FC = () => {
-  const [load, setLoad] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>();
   const { initialState, setInitialState } = useModel('@@initialState');
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
+  const [fileList, setFileList] = useState<any>([]);
 
-  const uploadButton = (
-    <div>
-      {load ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </div>
-  );
-  const handleChange: UploadProps['onChange'] = (
-    info: UploadChangeParam<UploadFile>,
-  ) => {
-    if (info.file.status === 'uploading') {
-      setLoad(true);
-      return;
+  const handleCancel = () => setPreviewOpen(false);
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as RcFile);
     }
-    if (info.file.status === 'done') {
-      setImageUrl(info.file.thumbUrl);
-      setLoad(false);
-    }
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+    setPreviewTitle(
+      file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1),
+    );
+  };
+
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
   };
 
   const normFile = (e: any) => {
@@ -54,15 +60,14 @@ const Center: React.FC = () => {
   };
 
   const onFinish = async (values: any) => {
-    const tem = JSON.parse(JSON.stringify(values));
-    if (values.avatar && values.avatar.length > 0) {
-      tem.avatar = values.avatar[0].thumbUrl;
+    if (fileList && fileList.length === 1) {
+      values.avatar = fileList[0];
     }
-    const data = await upload({ ...tem });
+    const data = await upload({ ...values });
     if (data.success) {
       message.success('更新成功');
-      localStorage.setItem('userinfo', JSON.stringify({ ...tem }));
-      setInitialState((s: any) => ({ ...s, userinfo: { ...tem } }));
+      localStorage.setItem('userinfo', JSON.stringify({ ...values }));
+      setInitialState((s: any) => ({ ...s, userinfo: { ...values } }));
     }
   };
 
@@ -87,8 +92,8 @@ const Center: React.FC = () => {
                 }}
                 alt="example"
                 src={
-                  initialState?.userinfo?.avatar
-                    ? initialState?.userinfo.avatar
+                  initialState?.userinfo?.avatar?.thumbUrl
+                    ? initialState?.userinfo.avatar?.thumbUrl
                     : 'https://joesch.moe/api/v1/random'
                 }
               />
@@ -139,34 +144,42 @@ const Center: React.FC = () => {
                 <Select placeholder="请选择" allowClear>
                   <Option value={1}>男</Option>
                   <Option value={2}>女</Option>
-                  <Option value={3}>不知</Option>
+                  <Option value={3}>未知</Option>
                 </Select>
               </Form.Item>
               <Form.Item label="个人简介" name="introduction">
                 <TextArea rows={4} placeholder="请输入" allowClear />
               </Form.Item>
               <Form.Item
-                name="avatar"
-                label="头像"
+                label="封面图片"
                 valuePropName="fileList"
                 getValueFromEvent={normFile}
               >
                 <Upload
-                  name="avatar"
-                  maxCount={1}
                   listType="picture-card"
+                  fileList={fileList}
+                  onPreview={handlePreview}
                   onChange={handleChange}
                 >
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt="avatar"
-                      style={{ width: '100%' }}
-                    />
-                  ) : (
-                    uploadButton
+                  {fileList.length >= 1 ? null : (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
                   )}
                 </Upload>
+                <Modal
+                  open={previewOpen}
+                  title={previewTitle}
+                  footer={null}
+                  onCancel={handleCancel}
+                >
+                  <img
+                    alt="example"
+                    style={{ width: '100%' }}
+                    src={previewImage}
+                  />
+                </Modal>
               </Form.Item>
               <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                 <Button type="primary" htmlType="submit">
