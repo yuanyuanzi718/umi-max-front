@@ -4,8 +4,8 @@ import type { RequestConfig } from '@umijs/max';
 export const request: RequestConfig = {
   timeout: 5000,
   errorConfig: {
-    errorHandler() {},
-    errorThrower() {},
+    errorHandler() { },
+    errorThrower() { },
   },
   requestInterceptors: [
     [
