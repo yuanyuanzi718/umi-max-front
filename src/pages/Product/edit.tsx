@@ -78,6 +78,10 @@ const Edit: React.FC<PropsWithChildren<any>> = forwardRef((props, ref) => {
 
   // 提交表单
   const onFinish = async (values: any) => {
+    console.log(values, 'values');
+    console.log(fileList, 'fileList');
+
+
     if (fileList && fileList.length === 1) {
       values.cover = fileList[0];
     }
