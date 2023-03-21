@@ -5,7 +5,7 @@ declare namespace API {
   interface Result_UserInfo_ {
     success?: boolean;
     errorMessage?: string;
-    data?: UserInfo;
+    data?: any;
   }
 
   interface CenterInfoVO {

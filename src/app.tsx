@@ -50,7 +50,7 @@ export async function getInitialState(): Promise<any> {
 
 export const layout = () => {
   return {
-    title: '工作台',
+    title: '新闻工作台',
     logo: 'https://img.alicdn.com/tfs/TB1YYanxET1gK0jSZFhXXaAtVXa-275-282.png',
     menu: {
       locale: false,

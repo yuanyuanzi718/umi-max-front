@@ -71,6 +71,7 @@ const Edit: React.FC<PropsWithChildren<any>> = forwardRef((props, ref) => {
       setOpen(true);
       setStatus(status);
       setRecord(record);
+      setFileList([]);
       form.resetFields();
     } else {
       setOpen(true);

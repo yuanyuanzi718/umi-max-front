@@ -47,17 +47,7 @@ const Login: React.FC = () => {
               message.error('用户名或密码不正确');
             }
           }}
-          logo="https://github.githubassets.com/images/modules/logos_page/Octocat.png"
-          title="Github"
-          subTitle="全球最大的代码托管平台"
-          actions={
-            <Space>
-              其他登录方式
-              <AlipayCircleOutlined style={iconStyles} />
-              <TaobaoCircleOutlined style={iconStyles} />
-              <WeiboCircleOutlined style={iconStyles} />
-            </Space>
-          }
+          title="新闻工作台"
         >
           <Tabs
             centered

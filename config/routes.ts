@@ -44,19 +44,5 @@ export default [
     component: '@/pages/Product',
     wrappers: ['@/wrappers/auth'],
   },
-  {
-    name: '权限演示',
-    exact: true,
-    path: '/access',
-    component: '@/pages/Access',
-    wrappers: ['@/wrappers/auth'],
-  },
-  {
-    name: 'CRUD 示例',
-    exact: true,
-    path: '/table',
-    component: '@/pages/Table',
-    wrappers: ['@/wrappers/auth'],
-  },
   { path: '*', component: '@/pages/404.tsx' },
 ];
